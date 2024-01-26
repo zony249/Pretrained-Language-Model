@@ -27,7 +27,7 @@ import argparse
 import torch
 import numpy as np
 
-from transformer import BertTokenizer, BertForMaskedLM
+from transformers import BertTokenizer, BertForMaskedLM
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -174,7 +174,7 @@ class DataAugmentor(object):
 
         predictions = self.model(tokens_tensor, segments_tensor)
 
-        word_candidates = torch.argsort(predictions[0, mask_id], descending=True)[:self.M].tolist()
+        word_candidates = torch.argsort(predictions[0][0, mask_id], descending=True)[:self.M].tolist()
         word_candidates = self.tokenizer.convert_ids_to_tokens(word_candidates)
 
         return list(filter(lambda x: x.find("##"), word_candidates))
