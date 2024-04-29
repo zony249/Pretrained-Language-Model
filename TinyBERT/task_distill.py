@@ -740,6 +740,7 @@ def main():
     parser.add_argument('--temperature',
                         type=float,
                         default=1.)
+    parser.add_argument("--reverse", type=str, default="none", choices=["none", "all", "except_embed", "middle"])
 
     args = parser.parse_args()
     logger.info('The args: {}'.format(args))
@@ -946,6 +947,15 @@ def main():
                     new_teacher_atts = [teacher_atts[i * layers_per_block + layers_per_block - 1]
                                         for i in range(student_layer_num)]
 
+                    if args.reverse == "all": 
+                        new_teacher_atts = [teacher_atts[i * layers_per_block]
+                                        for i in range(student_layer_num)]
+                        new_teacher_atts = new_teacher_atts[::-1]
+                    if args.reverse == "except_embed": 
+                        raise NotImplementedError() 
+                    if args.reverse == "middle": 
+                        raise NotImplementedError()
+
                     for student_att, teacher_att in zip(student_atts, new_teacher_atts):
                         student_att = torch.where(student_att <= -1e2, torch.zeros_like(student_att).to(device),
                                                   student_att)
@@ -956,6 +966,15 @@ def main():
                         att_loss += tmp_loss
 
                     new_teacher_reps = [teacher_reps[i * layers_per_block] for i in range(student_layer_num + 1)]
+
+                    if args.reverse == "all": 
+                        new_teacher_reps = new_teacher_reps[::-1]
+                    if args.reverse == "except_embed":
+                        raise NotImplementedError()
+                    if args.reverse == "middle":
+                        raise NotImplementedError()
+
+
                     new_student_reps = student_reps
                     for student_rep, teacher_rep in zip(new_student_reps, new_teacher_reps):
                         tmp_loss = loss_mse(student_rep, teacher_rep)
